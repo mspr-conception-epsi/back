@@ -64,5 +64,8 @@ public class User {
 		builder.append("User [id=").append(id).append(", name=").append(name).append(", password=").append(password)
 				.append(", token=").append(token).append(", request=").append(request).append("]");
 		return builder.toString();
-	}	
+	}
+	
+	
+	
 }

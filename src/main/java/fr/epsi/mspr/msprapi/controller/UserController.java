@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.epsi.mspr.msprapi.entities.User;
 import fr.epsi.mspr.msprapi.repository.UserRepository;
+import io.swagger.annotations.ApiOperation;
 
 @RestController
 public class UserController {
@@ -19,12 +20,14 @@ public class UserController {
 	@Autowired
 	private UserRepository userRepository;
 
-	@GetMapping("/users")
-	public List<User> getAllNotes() {
+	@ApiOperation(value = "List of users")
+	@GetMapping("/user/")
+	public List<User> findAll() {
 		return userRepository.findAll();
 	}
 	
-	@PostMapping("/users")
+	@ApiOperation(value = "Create new user")
+	@PostMapping("/user/create")
     public User createUser(@Valid @RequestBody User user) {
         return userRepository.save(user);
     }
