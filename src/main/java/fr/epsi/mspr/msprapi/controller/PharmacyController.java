@@ -28,8 +28,8 @@ public class PharmacyController {
 	}
 	
 	@ApiOperation(value = "List of pharmacies in area size")
-	@GetMapping("/pharmacy/{areaSize}")
-	public List<Pharmacy> findAllInArea(@PathVariable("areaSize") long areaSize) {
+	@GetMapping("/pharmacy/{coordLong}{coordLat}{areaSize}")
+	public List<Pharmacy> findAllInArea(@PathVariable("coordLong") long coordLong, @PathVariable("coordLat") long coordLat, @PathVariable("areaSize") long areaSize) {
 		return pharmacyRepository.findAll();
 	}
 	
