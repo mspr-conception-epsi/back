@@ -36,12 +36,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
                 .authorizeRequests()
+                	.antMatchers("/**").permitAll() //.authenticated()
+                	
+                	/*
                 	.antMatchers("/auth/**").permitAll()
                 	.antMatchers("/v2/api-docs").permitAll()
                 	.antMatchers("/swagger-resources/**").permitAll()
                 	.antMatchers("/swagger-ui.html").permitAll()
-                	.antMatchers("/webjars/**").permitAll()
-                	.antMatchers("/**").authenticated()
+                	.antMatchers("/webjars/**").permitAll()*/
             .and()
             .apply(new JwtConfigurer(jwtTokenProvider));
     }
