@@ -1,7 +1,6 @@
 package fr.epsi.mspr.msprapi.filter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -33,13 +32,11 @@ public class CustomFilter extends GenericFilterBean {
 			"/swagger-ui.html", "/error" };
 
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-			throws IOException, ServletException {
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
 		if (userRepository == null) {
 			ServletContext servletContext = request.getServletContext();
-			WebApplicationContext webApplicationContext = WebApplicationContextUtils
-					.getWebApplicationContext(servletContext);
+			WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
 			userRepository = webApplicationContext.getBean(UserRepository.class);
 		}
 
@@ -48,7 +45,7 @@ public class CustomFilter extends GenericFilterBean {
 
 		String pathWithinApplication = new UrlPathHelper().getPathWithinApplication(httpRequest);
 
-		for (String value : WHITELIST) {
+		for (final String value : WHITELIST) {
 			if (pathWithinApplication.contains(value)) {
 				chain.doFilter(request, response);
 				return;
@@ -74,7 +71,7 @@ public class CustomFilter extends GenericFilterBean {
 					sendInvalidReponse(httpResponse, "User not found");
 				}
 			} else {
-				sendInvalidReponse(httpResponse, "Bad credentials");
+				sendInvalidReponse(httpResponse, "Empty input for username or password");
 			}
 		} else {
 			String token = getBearerToken(httpRequest);
@@ -82,7 +79,7 @@ public class CustomFilter extends GenericFilterBean {
 				sendInvalidReponse(httpResponse, "Token not found");
 			} else {
 				Optional<User> optionalUser = userRepository.findByToken(token);
-				if(optionalUser.isPresent()) {
+				if (optionalUser.isPresent()) {
 					chain.doFilter(request, response);
 				} else {
 					sendInvalidReponse(httpResponse, "Invalid token");
