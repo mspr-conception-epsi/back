@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import fr.epsi.mspr.msprapi.entities.Pharmacy;
 import fr.epsi.mspr.msprapi.entities.service.PharmacyService;
 import fr.epsi.mspr.msprapi.repository.PharmacyRepository;
 
+@Service
 public class PharmacyServiceImpl implements PharmacyService {
 
 	@Autowired

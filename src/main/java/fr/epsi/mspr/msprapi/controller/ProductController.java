@@ -21,7 +21,7 @@ public class ProductController {
 	private ProductRepository productRepository;
 
 	@ApiOperation(value = "List of product")
-	@GetMapping("/product/")
+	@GetMapping("/product")
 	public List<Product> findAll() {
 		return productRepository.findAll();
 	}

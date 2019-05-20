@@ -27,7 +27,7 @@ public class PharmacyController {
 	private PharmacyService pharmacyService;
 
 	@ApiOperation(value = "List of pharmacies")
-	@GetMapping("/pharmacy/")
+	@GetMapping("/pharmacy")
 	public List<Pharmacy> findAll() {
 		return pharmacyRepository.findAll();
 	}

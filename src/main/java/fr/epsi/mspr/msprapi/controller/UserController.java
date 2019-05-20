@@ -21,7 +21,7 @@ public class UserController {
 	private UserRepository userRepository;
 
 	@ApiOperation(value = "List of users")
-	@GetMapping("/user/")
+	@GetMapping("/user")
 	public List<User> findAll() {
 		return userRepository.findAll();
 	}
