@@ -32,7 +32,7 @@ public class ProductController {
         return productRepository.save(product);
     }
 	
-	@ApiOperation(value = "Delte a product")
+	@ApiOperation(value = "Delete a product")
 	@PostMapping("/product/delete")
     public Product deleteProduct(@Valid @RequestBody Product product) {
         return productRepository.save(product);

@@ -1,6 +1,7 @@
 package fr.epsi.mspr.msprapi.filter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +29,8 @@ public class CustomFilter extends GenericFilterBean {
 
 	private static final String AUTH_SIGNIN = "/auth/signin";
 	private UserRepository userRepository;
+	private static final String[] WHITELIST = { "/swagger-resources", "/swagger-ui.html", "/v2/api-docs", "/webjars",
+			"/swagger-ui.html", "/error" };
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -45,7 +48,14 @@ public class CustomFilter extends GenericFilterBean {
 
 		String pathWithinApplication = new UrlPathHelper().getPathWithinApplication(httpRequest);
 
-		if (AUTH_SIGNIN.equals(pathWithinApplication)) {
+		for (String value : WHITELIST) {
+			if (pathWithinApplication.contains(value)) {
+				chain.doFilter(request, response);
+				return;
+			}
+		}
+
+		if (AUTH_SIGNIN.startsWith(pathWithinApplication)) {
 			Optional<String> username = Optional.ofNullable(httpRequest.getHeader("X-Auth-Username"));
 			Optional<String> password = Optional.ofNullable(httpRequest.getHeader("X-Auth-Password"));
 			if (username.isPresent() && password.isPresent()) {
@@ -67,12 +77,17 @@ public class CustomFilter extends GenericFilterBean {
 				sendInvalidReponse(httpResponse, "Bad credentials");
 			}
 		} else {
-			Optional<String> token = Optional.ofNullable(httpRequest.getHeader("X-Auth-Token"));
-			if (!token.isPresent() || !userRepository.findByToken(token.get()).isPresent()) {
-				sendInvalidReponse(httpResponse, "Invalid token");
-				return;
+			String token = getBearerToken(httpRequest);
+			if (token == null) {
+				sendInvalidReponse(httpResponse, "Token not found");
+			} else {
+				Optional<User> optionalUser = userRepository.findByToken(token);
+				if(optionalUser.isPresent()) {
+					chain.doFilter(request, response);
+				} else {
+					sendInvalidReponse(httpResponse, "Invalid token");
+				}
 			}
-			chain.doFilter(request, response);
 		}
 	}
 
@@ -83,13 +98,21 @@ public class CustomFilter extends GenericFilterBean {
 		httpResponse.addHeader("Content-Type", "application/json");
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
 	}
-	
+
 	private void sendInvalidReponse(HttpServletResponse httpResponse, String message) throws IOException {
 		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("error", message);
 		httpResponse.addHeader("Content-Type", "application/json");
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
+	}
+
+	private String getBearerToken(HttpServletRequest request) {
+		String authHeader = request.getHeader("Authorization");
+		if (authHeader != null && authHeader.startsWith("Bearer ")) {
+			return authHeader.substring("Bearer ".length());
+		}
+		return null;
 	}
 
 	private HttpServletRequest asHttp(ServletRequest request) {

@@ -16,6 +16,6 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
 				.exceptionHandling().and()
 				.addFilterAfter(new CustomFilter(), BasicAuthenticationFilter.class)
 				.authorizeRequests()
-				.antMatchers(HttpMethod.POST, "/**").permitAll();
+				.antMatchers("/**").permitAll();
 	}
 }
