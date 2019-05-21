@@ -74,6 +74,7 @@ public class CustomFilter extends GenericFilterBean {
 					Optional<User> optionalUser = userRepository.findByName(username.get());
 					if (optionalUser.isPresent()) {
 						User user = optionalUser.get();
+						System.out.println(password.get());
 						if (user.getPassword().equals(password.get())) {
 							String generatedToken = UUID.randomUUID().toString();
 							user.setToken(generatedToken);
