@@ -11,7 +11,7 @@ public class Product {
 	private int id;
 	private String name;
 	private float price;
-	private String logoBase64;
+	private String description;
 	@Column(name = "logo_base_64")
 	private String logo;
 	
@@ -33,16 +33,13 @@ public class Product {
 	public void setPrice(float price) {
 		this.price = price;
 	}
-	public String getLogoBase64() {
-		return logoBase64;
-	}
-	public void setLogoBase64(String logoBase64) {
-		this.logoBase64 = logoBase64;
-	}
 	public String getLogo() {
 		return logo;
 	}
 	public void setLogo(String logo) {
 		this.logo = logo;
-	}	
+	}
+	public String getDescription() {
+		return description;
+	}
 }
