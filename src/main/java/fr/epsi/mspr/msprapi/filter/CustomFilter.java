@@ -86,60 +86,49 @@ public class CustomFilter extends GenericFilterBean {
 							String generatedToken = UUID.randomUUID().toString();
 							user.setToken(generatedToken);
 							userRepository.save(user);
-							setValidReponseWithToken(httpRequest, httpResponse, generatedToken);
+							setValidReponseWithToken(httpResponse, generatedToken);
 							System.out.println("return " + generatedToken);
 						} else {
-							sendInvalidReponse(httpRequest, httpResponse, "Invalid password");
+							sendInvalidReponse(httpResponse, "Invalid password");
 						}
 					} else {
-						sendInvalidReponse(httpRequest, httpResponse, "User not found");
+						sendInvalidReponse(httpResponse, "User not found");
 					}
 				} else {
-					sendInvalidReponse(httpRequest, httpResponse, "Empty input for username or password");
+					sendInvalidReponse(httpResponse, "Empty input for username or password");
 				}
 			} else {
-				sendInvalidReponse(httpRequest, httpResponse, "Invalid data : Please use Basic header authorization");
+				sendInvalidReponse(httpResponse, "Invalid data : Please use Basic header authorization");
 			}
 		} else {
 			String token = getBearerToken(httpRequest);
 			if (token == null) {
-				sendInvalidReponse(httpRequest, httpResponse, "Token not found");
+				sendInvalidReponse(httpResponse, "Token not found");
 			} else {
 				Optional<User> optionalUser = userRepository.findByToken(token);
 				if (optionalUser.isPresent()) {
 					chain.doFilter(request, response);
 				} else {
-					sendInvalidReponse(httpRequest, httpResponse, "Invalid token");
+					sendInvalidReponse(httpResponse, "Invalid token");
 				}
 			}
 		}
 	}
 
-	private void setValidReponseWithToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String generatedToken) throws IOException {
+	private void setValidReponseWithToken(HttpServletResponse httpResponse, String generatedToken) throws IOException {
 		httpResponse.setStatus(HttpServletResponse.SC_OK);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("token", generatedToken);
-		setHeaders(httpRequest, httpResponse);
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
 	}
 
-	private void sendInvalidReponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String message) throws IOException {
+	private void sendInvalidReponse(HttpServletResponse httpResponse, String message) throws IOException {
 		System.out.println("invalid response : " + message);
 		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("error", message);
-		setHeaders(httpRequest, httpResponse);
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
 	}
-
-	private void setHeaders(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-		httpResponse.setHeader("Access-Control-Allow-Origin", "*");
-		httpResponse.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,OPTIONS");
-		httpResponse.setHeader("Access-Control-Allow-Headers", "*");
-		httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
-        httpResponse.setHeader("Access-Control-Max-Age", "180");
-	}
-
 	private String getBearerToken(HttpServletRequest request) {
 		String authHeader = request.getHeader("Authorization");
 		System.out.println("header token > " + authHeader);
