@@ -1,7 +1,12 @@
 package fr.epsi.mspr.msprapi.filter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +19,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.GenericFilterBean;
@@ -30,13 +36,16 @@ public class CustomFilter extends GenericFilterBean {
 	private UserRepository userRepository;
 	private static final String[] WHITELIST = { "/swagger-resources", "/swagger-ui.html", "/v2/api-docs", "/webjars",
 			"/swagger-ui.html", "/error" };
+	private ListableBeanFactory listableBeanFactory;
 
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
 
 		if (userRepository == null) {
 			ServletContext servletContext = request.getServletContext();
-			WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+			WebApplicationContext webApplicationContext = WebApplicationContextUtils
+					.getWebApplicationContext(servletContext);
 			userRepository = webApplicationContext.getBean(UserRepository.class);
 		}
 
@@ -45,6 +54,8 @@ public class CustomFilter extends GenericFilterBean {
 
 		String pathWithinApplication = new UrlPathHelper().getPathWithinApplication(httpRequest);
 
+		System.out.println("received request at " + pathWithinApplication);
+
 		for (final String value : WHITELIST) {
 			if (pathWithinApplication.contains(value)) {
 				chain.doFilter(request, response);
@@ -52,26 +63,40 @@ public class CustomFilter extends GenericFilterBean {
 			}
 		}
 
+		System.out.println("let's go");
+
+		List<String> headerValuesList = Collections.list(httpRequest.getHeaderNames());
+		for (String header : headerValuesList) {
+			System.out.println("debug header list> " + header + " : " + httpRequest.getHeader(header));
+		}
+
 		if (AUTH_SIGNIN.startsWith(pathWithinApplication)) {
-			Optional<String> username = Optional.ofNullable(httpRequest.getHeader("X-Auth-Username"));
-			Optional<String> password = Optional.ofNullable(httpRequest.getHeader("X-Auth-Password"));
-			if (username.isPresent() && password.isPresent()) {
-				Optional<User> optionalUser = userRepository.findByName(username.get());
-				if (optionalUser.isPresent()) {
-					User user = optionalUser.get();
-					if (user.getPassword().equals(password.get())) {
-						String generatedToken = UUID.randomUUID().toString();
-						user.setToken(generatedToken);
-						userRepository.save(user);
-						setValidReponseWithToken(httpResponse, generatedToken);
+			System.out.println("try to auth");
+			Optional<String[]> data = getConnectionData(httpRequest);
+			if (data.isPresent()) {
+				Optional<String> username = Optional.ofNullable(data.get()[0]);
+				Optional<String> password = Optional.ofNullable(data.get()[1]);
+				if (username.isPresent() && password.isPresent()) {
+					Optional<User> optionalUser = userRepository.findByName(username.get());
+					if (optionalUser.isPresent()) {
+						User user = optionalUser.get();
+						if (user.getPassword().equals(password.get())) {
+							String generatedToken = UUID.randomUUID().toString();
+							user.setToken(generatedToken);
+							userRepository.save(user);
+							setValidReponseWithToken(httpResponse, generatedToken);
+							System.out.println("return " + generatedToken);
+						} else {
+							sendInvalidReponse(httpResponse, "Invalid password");
+						}
 					} else {
-						sendInvalidReponse(httpResponse, "Invalid password");
+						sendInvalidReponse(httpResponse, "User not found");
 					}
 				} else {
-					sendInvalidReponse(httpResponse, "User not found");
+					sendInvalidReponse(httpResponse, "Empty input for username or password");
 				}
 			} else {
-				sendInvalidReponse(httpResponse, "Empty input for username or password");
+				sendInvalidReponse(httpResponse, "Invalid data : Please use Basic header authorization");
 			}
 		} else {
 			String token = getBearerToken(httpRequest);
@@ -92,24 +117,46 @@ public class CustomFilter extends GenericFilterBean {
 		httpResponse.setStatus(HttpServletResponse.SC_OK);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("token", generatedToken);
-		httpResponse.addHeader("Content-Type", "application/json");
+		setHeaders(httpResponse);
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
 	}
 
 	private void sendInvalidReponse(HttpServletResponse httpResponse, String message) throws IOException {
+		System.out.println("invalid response : " + message);
 		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("error", message);
-		httpResponse.addHeader("Content-Type", "application/json");
+		setHeaders(httpResponse);
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
+	}
+
+	private void setHeaders(HttpServletResponse httpResponse) {
+		httpResponse.addHeader("Access-Control-Allow-Origin", "shyndard.eu:8080");
+		httpResponse.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+		httpResponse.addHeader("Access-Control-Allow-Headers",
+				"X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept, Authorization");
+		httpResponse.addHeader("Content-Type", "application/json");
 	}
 
 	private String getBearerToken(HttpServletRequest request) {
 		String authHeader = request.getHeader("Authorization");
-		if (authHeader != null && authHeader.startsWith("Bearer ")) {
+		System.out.println("header token > " + authHeader);
+		if (authHeader != null && authHeader.toLowerCase().startsWith("Bearer ")) {
 			return authHeader.substring("Bearer ".length());
 		}
 		return null;
+	}
+
+	private Optional<String[]> getConnectionData(HttpServletRequest request) {
+		String authHeader = request.getHeader("Authorization");
+		System.out.println("header user/pass > " + authHeader);
+		if (authHeader != null && authHeader.toLowerCase().startsWith("basic")) {
+			String base64Credentials = authHeader.substring("Basic".length()).trim();
+			byte[] credDecoded = Base64.getDecoder().decode(base64Credentials);
+			String credentials = new String(credDecoded, StandardCharsets.UTF_8);
+			return Optional.ofNullable(credentials.split(":", 2));
+		}
+		return Optional.empty();
 	}
 
 	private HttpServletRequest asHttp(ServletRequest request) {
