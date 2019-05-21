@@ -2,11 +2,9 @@ package fr.epsi.mspr.msprapi.filter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,6 +34,7 @@ public class CustomFilter extends GenericFilterBean {
 	private UserRepository userRepository;
 	private static final String[] WHITELIST = { "/swagger-resources", "/swagger-ui.html", "/v2/api-docs", "/webjars",
 			"/swagger-ui.html", "/error" };
+	private static final String[] ADMIN_RESTRICTED = { "/user/create", "/user/delete", "/user"};
 	private ListableBeanFactory listableBeanFactory;
 
 	@Override
@@ -63,15 +62,8 @@ public class CustomFilter extends GenericFilterBean {
 			}
 		}
 
-		System.out.println("let's go");
-
-		List<String> headerValuesList = Collections.list(httpRequest.getHeaderNames());
-		for (String header : headerValuesList) {
-			System.out.println("debug header list> " + header + " : " + httpRequest.getHeader(header));
-		}
-
 		System.out.println("method> " + httpRequest.getMethod());
-		
+
 		if (AUTH_SIGNIN.startsWith(pathWithinApplication)) {
 			System.out.println("try to auth");
 			Optional<String[]> data = getConnectionData(httpRequest);
@@ -107,7 +99,15 @@ public class CustomFilter extends GenericFilterBean {
 			} else {
 				Optional<User> optionalUser = userRepository.findByToken(token);
 				if (optionalUser.isPresent()) {
-					chain.doFilter(request, response);
+					if (Arrays.asList(ADMIN_RESTRICTED).contains(pathWithinApplication)) {
+						if (optionalUser.get().isAdmin()) {
+							chain.doFilter(request, response);
+						} else {
+							sendInvalidReponse(httpRequest, httpResponse, "Need to be an admin");
+						}
+					} else {
+						chain.doFilter(request, response);
+					}
 				} else {
 					sendInvalidReponse(httpRequest, httpResponse, "Invalid token");
 				}
@@ -115,7 +115,8 @@ public class CustomFilter extends GenericFilterBean {
 		}
 	}
 
-	private void setValidReponseWithToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String generatedToken) throws IOException {
+	private void setValidReponseWithToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
+			String generatedToken) throws IOException {
 		httpResponse.setStatus(HttpServletResponse.SC_OK);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("token", generatedToken);
@@ -123,7 +124,8 @@ public class CustomFilter extends GenericFilterBean {
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
 	}
 
-	private void sendInvalidReponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String message) throws IOException {
+	private void sendInvalidReponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String message)
+			throws IOException {
 		System.out.println("invalid response : " + message);
 		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		Map<String, String> reponse = new HashMap<>();
@@ -137,7 +139,7 @@ public class CustomFilter extends GenericFilterBean {
 		httpResponse.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,OPTIONS");
 		httpResponse.setHeader("Access-Control-Allow-Headers", "*");
 		httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
-        httpResponse.setHeader("Access-Control-Max-Age", "180");
+		httpResponse.setHeader("Access-Control-Max-Age", "180");
 	}
 
 	private String getBearerToken(HttpServletRequest request) {
