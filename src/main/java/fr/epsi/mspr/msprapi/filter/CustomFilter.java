@@ -119,7 +119,7 @@ public class CustomFilter extends GenericFilterBean {
 		httpResponse.setStatus(HttpServletResponse.SC_OK);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("token", generatedToken);
-		//setHeaders(httpRequest, httpResponse);
+		setHeaders(httpRequest, httpResponse);
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
 	}
 
@@ -128,8 +128,16 @@ public class CustomFilter extends GenericFilterBean {
 		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("error", message);
-		//setHeaders(httpRequest, httpResponse);
+		setHeaders(httpRequest, httpResponse);
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
+	}
+
+	private void setHeaders(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+		httpResponse.setHeader("Access-Control-Allow-Origin", "*");
+		httpResponse.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,OPTIONS");
+		httpResponse.setHeader("Access-Control-Allow-Headers", "*");
+		httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
+        httpResponse.setHeader("Access-Control-Max-Age", "180");
 	}
 
 	private String getBearerToken(HttpServletRequest request) {
