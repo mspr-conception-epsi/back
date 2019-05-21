@@ -81,13 +81,13 @@ public class CustomFilter extends GenericFilterBean {
 							setValidReponseWithToken(httpRequest, httpResponse, generatedToken);
 							System.out.println("return " + generatedToken);
 						} else {
-							sendInvalidReponse(httpRequest, httpResponse, "Invalid password");
+							sendInvalidReponse(httpRequest, httpResponse, "Mot de passe incorrect.");
 						}
 					} else {
-						sendInvalidReponse(httpRequest, httpResponse, "User not found");
+						sendInvalidReponse(httpRequest, httpResponse, "Utilisateur introuvable.");
 					}
 				} else {
-					sendInvalidReponse(httpRequest, httpResponse, "Empty input for username or password");
+					sendInvalidReponse(httpRequest, httpResponse, "Mot de passe ou utilisateur non spécifié");
 				}
 			} else {
 				sendInvalidReponse(httpRequest, httpResponse, "Invalid data : Please use Basic header authorization");
@@ -103,13 +103,13 @@ public class CustomFilter extends GenericFilterBean {
 						if (optionalUser.get().isAdmin()) {
 							chain.doFilter(request, response);
 						} else {
-							sendInvalidReponse(httpRequest, httpResponse, "Need to be an admin");
+							sendInvalidReponse(httpRequest, httpResponse, "Vous devez être un admin");
 						}
 					} else {
 						chain.doFilter(request, response);
 					}
 				} else {
-					sendInvalidReponse(httpRequest, httpResponse, "Invalid token");
+					sendInvalidReponse(httpRequest, httpResponse, "Token invalide. Veuillez vous reconnecter");
 				}
 			}
 		}
