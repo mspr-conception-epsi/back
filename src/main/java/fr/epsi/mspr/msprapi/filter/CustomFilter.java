@@ -17,7 +17,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.GenericFilterBean;
@@ -35,7 +34,6 @@ public class CustomFilter extends GenericFilterBean {
 	private static final String[] WHITELIST = { "/swagger-resources", "/swagger-ui.html", "/v2/api-docs", "/webjars",
 			"/swagger-ui.html", "/error" };
 	private static final String[] ADMIN_RESTRICTED = { "/user/create", "/user/delete", "/user", "/formation/create", "/formation/delete"};
-	private ListableBeanFactory listableBeanFactory;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -104,7 +102,7 @@ public class CustomFilter extends GenericFilterBean {
 						if (optionalUser.get().isAdmin()) {
 							chain.doFilter(request, response);
 						} else {
-							sendInvalidReponse(httpRequest, httpResponse, "Vous devez être un admin");
+							sendInvalidReponse(httpRequest, httpResponse, "Vous devez etre un admin");
 						}
 					} else {
 						chain.doFilter(request, response);

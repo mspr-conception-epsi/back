@@ -35,7 +35,7 @@ public class FormationController {
 	
 	@ApiOperation(value = "Delete a formation")
 	@PostMapping("/formation/delete")
-	public Formation deleteFormation(@Valid @RequestBody Formation formation) {
-		return formationRepository.save(formation);
+	public void deleteFormation(@Valid @RequestBody Formation formation) {
+		formationRepository.delete(formation);
 	}
 }
