@@ -1,6 +1,9 @@
 package fr.epsi.mspr.msprapi.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -35,8 +38,19 @@ public class FormationController {
 	
 	@ApiOperation(value = "Delete a formation")
 	@PostMapping("/formation/delete")
-	public String deleteFormation(@Valid @RequestBody Formation formation) {
-		formationRepository.delete(formation);
-		return "success";
+	public Map<String, String> deleteFormation(@Valid @RequestBody Formation formation) {
+		Map<String, String> msg = new HashMap<>();
+		if(formation.getId() > 0) {
+			Optional<Formation> form = formationRepository.findById((long)formation.getId());
+			if(form.isPresent()) {
+				formationRepository.delete(formation);
+				msg.put("success", "Formation supprimée");
+			} else {
+				msg.put("error", "Formation inexistante");
+			}
+		} else {
+			msg.put("error", "Veuillez fournir l'identifiant");
+		}
+		return msg;
 	}
 }
