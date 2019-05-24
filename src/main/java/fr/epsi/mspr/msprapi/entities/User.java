@@ -2,6 +2,7 @@ package fr.epsi.mspr.msprapi.entities;
 
 import java.io.Serializable;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

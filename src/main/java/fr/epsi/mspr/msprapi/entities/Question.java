@@ -14,6 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import fr.epsi.mspr.msprapi.enums.QuestionType;
 
 @Entity
@@ -25,10 +27,8 @@ public class Question {
 	private String label;
 	private String content;
 	private int sort;
-
-	@ManyToOne()
-	@JoinColumn(name = "form")
-	private Form form;
+	
+	private int form;
 	
 	@OneToMany(mappedBy = "question", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private List<Response> responses;
@@ -68,11 +68,11 @@ public class Question {
 		this.sort = sort;
 	}
 
-	public Form getForm() {
+	public int getForm() {
 		return form;
 	}
 
-	public void setForm(Form form) {
+	public void setForm(int form) {
 		this.form = form;
 	}
 

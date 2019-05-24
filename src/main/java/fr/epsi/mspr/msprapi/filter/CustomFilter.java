@@ -22,6 +22,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.epsi.mspr.msprapi.entities.User;
@@ -29,6 +30,7 @@ import fr.epsi.mspr.msprapi.repository.UserRepository;
 
 public class CustomFilter extends GenericFilterBean {
 
+	private static final String LOGOUT = "/logout";
 	private static final String AUTH_SIGNIN = "/auth/signin";
 	private UserRepository userRepository;
 	private static final String[] WHITELIST = { "/swagger-resources", "/swagger-ui.html", "/v2/api-docs", "/webjars",
@@ -98,14 +100,21 @@ public class CustomFilter extends GenericFilterBean {
 			} else {
 				Optional<User> optionalUser = userRepository.findByToken(token);
 				if (optionalUser.isPresent()) {
+					User user = optionalUser.get();
 					if (Arrays.asList(ADMIN_RESTRICTED).contains(pathWithinApplication)) {
-						if (optionalUser.get().isAdmin()) {
+						if (user.isAdmin()) {
 							chain.doFilter(request, response);
 						} else {
 							sendInvalidReponse(httpRequest, httpResponse, "Vous devez etre un admin");
 						}
 					} else {
-						chain.doFilter(request, response);
+						if(LOGOUT.equals(pathWithinApplication)) {
+							user.setToken(null);
+							userRepository.save(user);
+							sendLogoutReponse(httpRequest, httpResponse);
+						} else {
+							chain.doFilter(request, response);
+						}
 					}
 				} else {
 					sendInvalidReponse(httpRequest, httpResponse, "Token invalide. Veuillez vous reconnecter");
@@ -114,12 +123,20 @@ public class CustomFilter extends GenericFilterBean {
 		}
 	}
 
+	private void sendLogoutReponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws JsonProcessingException, IOException {
+		httpResponse.setStatus(HttpServletResponse.SC_OK);
+		Map<String, String> reponse = new HashMap<>();
+		reponse.put("success", "Déconnexion effectuée");
+		setHeaders(httpResponse);
+		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
+	}
+
 	private void setValidReponseWithToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
 			String generatedToken) throws IOException {
 		httpResponse.setStatus(HttpServletResponse.SC_OK);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("token", generatedToken);
-		setHeaders(httpRequest, httpResponse);
+		setHeaders(httpResponse);
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
 	}
 
@@ -129,11 +146,11 @@ public class CustomFilter extends GenericFilterBean {
 		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("error", message);
-		setHeaders(httpRequest, httpResponse);
+		setHeaders(httpResponse);
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
 	}
 
-	private void setHeaders(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+	private void setHeaders(HttpServletResponse httpResponse) {
 		httpResponse.setHeader("Access-Control-Allow-Origin", "*");
 		httpResponse.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,OPTIONS");
 		httpResponse.setHeader("Access-Control-Allow-Headers", "*");

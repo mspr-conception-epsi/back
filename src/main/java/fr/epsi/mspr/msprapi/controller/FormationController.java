@@ -41,7 +41,7 @@ public class FormationController {
 	public Map<String, String> updateFormation(@Valid @RequestBody Formation formation) {
 		Map<String, String> msg = new HashMap<>();
 		if(formation.getId() > 0) {
-			Optional<Formation> form = formationRepository.findById((long)formation.getId());
+			Optional<Formation> form = formationRepository.findById(formation.getId());
 			if(form.isPresent()) {
 				formationRepository.save(formation);
 				msg.put("success", "Formation modifiée");
@@ -59,9 +59,9 @@ public class FormationController {
 	public Map<String, String> deleteFormation(@Valid @RequestBody Formation formation) {
 		Map<String, String> msg = new HashMap<>();
 		if(formation.getId() > 0) {
-			Optional<Formation> form = formationRepository.findById((long)formation.getId());
-			if(form.isPresent()) {
-				formationRepository.delete(formation);
+			Optional<Formation> option = formationRepository.findById(formation.getId());
+			if(option.isPresent()) {
+				formationRepository.delete(option.get());
 				msg.put("success", "Formation supprimée");
 			} else {
 				msg.put("error", "Formation inexistante");

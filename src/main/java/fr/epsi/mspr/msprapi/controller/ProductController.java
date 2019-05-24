@@ -40,8 +40,8 @@ public class ProductController {
 	public Map<String, String> updateProduct(@Valid @RequestBody Product product) {
 		Map<String, String> msg = new HashMap<>();
 		if (product.getId() > 0) {
-			Optional<Product> form = productRepository.findById((long) product.getId());
-			if (form.isPresent()) {
+			Optional<Product> option = productRepository.findById(product.getId());
+			if (option.isPresent()) {
 				productRepository.save(product);
 				msg.put("success", "Produit modifié");
 			} else {
@@ -58,9 +58,9 @@ public class ProductController {
 	public Map<String, String> deleteProduct(@Valid @RequestBody Product product) {
 		Map<String, String> msg = new HashMap<>();
 		if (product.getId() > 0) {
-			Optional<Product> form = productRepository.findById((long) product.getId());
-			if (form.isPresent()) {
-				productRepository.delete(product);
+			Optional<Product> option = productRepository.findById(product.getId());
+			if (option.isPresent()) {
+				productRepository.delete(option.get());
 				msg.put("success", "Produit supprimé");
 			} else {
 				msg.put("error", "Produit inexistant");

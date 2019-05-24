@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import fr.epsi.mspr.msprapi.entities.Request;
 
 @Repository
-public interface RequestRepository extends JpaRepository<Request, Long> {
+public interface RequestRepository extends JpaRepository<Request, Integer> {
 
 }

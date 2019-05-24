@@ -40,8 +40,8 @@ public class UserController {
     public Map<String, String> updateUser(@Valid @RequestBody User user) {
 		Map<String, String> msg = new HashMap<>();
 		if(user.getId() > 0) {
-			Optional<User> form = userRepository.findById((long)user.getId());
-			if(form.isPresent()) {
+			Optional<User> option = userRepository.findById(user.getId());
+			if(option.isPresent()) {
 				userRepository.save(user);
 				msg.put("success", "Utilisateur modifié");
 			} else {
@@ -58,9 +58,9 @@ public class UserController {
     public Map<String, String> deleteUser(@Valid @RequestBody User user) {
 		Map<String, String> msg = new HashMap<>();
 		if(user.getId() > 0) {
-			Optional<User> form = userRepository.findById((long)user.getId());
-			if(form.isPresent()) {
-				userRepository.delete(user);
+			Optional<User> option = userRepository.findById(user.getId());
+			if(option.isPresent()) {
+				userRepository.delete(option.get());
 				msg.put("success", "Utilisateur supprimé");
 			} else {
 				msg.put("error", "Utilisateur inexistant");

@@ -40,8 +40,8 @@ public class RequestController {
     public Map<String, String> updateRequest(@Valid @RequestBody Request request) {
 		Map<String, String> msg = new HashMap<>();
 		if(request.getId() > 0) {
-			Optional<Request> form = requestRepository.findById((long)request.getId());
-			if(form.isPresent()) {
+			Optional<Request> option = requestRepository.findById(request.getId());
+			if(option.isPresent()) {
 				requestRepository.save(request);
 				msg.put("success", "Utilisateur modifié");
 			} else {
@@ -58,9 +58,9 @@ public class RequestController {
     public Map<String, String> deleteRequest(@Valid @RequestBody Request request) {
 		Map<String, String> msg = new HashMap<>();
 		if(request.getId() > 0) {
-			Optional<Request> form = requestRepository.findById((long)request.getId());
-			if(form.isPresent()) {
-				requestRepository.delete(request);
+			Optional<Request> option = requestRepository.findById(request.getId());
+			if(option.isPresent()) {
+				requestRepository.delete(option.get());
 				msg.put("success", "Utilisateur supprimé");
 			} else {
 				msg.put("error", "Utilisateur inexistant");

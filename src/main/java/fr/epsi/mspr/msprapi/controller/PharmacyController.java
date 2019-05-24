@@ -46,8 +46,8 @@ public class PharmacyController {
 	public Map<String, String> updatePharmacy(@Valid @RequestBody Pharmacy pharmacy) {
 		Map<String, String> msg = new HashMap<>();
 		if(pharmacy.getId() > 0) {
-			Optional<Pharmacy> form = pharmacyRepository.findById((long)pharmacy.getId());
-			if(form.isPresent()) {
+			Optional<Pharmacy> option = pharmacyRepository.findById(pharmacy.getId());
+			if(option.isPresent()) {
 				pharmacyRepository.save(pharmacy);
 				msg.put("success", "Pharmacie modifiée");
 			} else {
@@ -64,9 +64,9 @@ public class PharmacyController {
 	public Map<String, String> deletePharmacy(@Valid @RequestBody Pharmacy pharmacy) {
 		Map<String, String> msg = new HashMap<>();
 		if(pharmacy.getId() > 0) {
-			Optional<Pharmacy> form = pharmacyRepository.findById((long)pharmacy.getId());
-			if(form.isPresent()) {
-				pharmacyRepository.delete(pharmacy);
+			Optional<Pharmacy> option = pharmacyRepository.findById(pharmacy.getId());
+			if(option.isPresent()) {
+				pharmacyRepository.delete(option.get());
 				msg.put("success", "Pharmacie supprimée");
 			} else {
 				msg.put("error", "Pharmacie inexistante");

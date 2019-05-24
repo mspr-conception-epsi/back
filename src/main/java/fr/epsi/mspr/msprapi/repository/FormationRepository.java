@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import fr.epsi.mspr.msprapi.entities.Formation;
 
 @Repository
-public interface FormationRepository extends JpaRepository<Formation, Long> {
+public interface FormationRepository extends JpaRepository<Formation, Integer> {
 
 }
