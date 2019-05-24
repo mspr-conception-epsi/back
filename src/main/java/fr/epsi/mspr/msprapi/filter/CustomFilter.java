@@ -34,7 +34,7 @@ public class CustomFilter extends GenericFilterBean {
 	private UserRepository userRepository;
 	private static final String[] WHITELIST = { "/swagger-resources", "/swagger-ui.html", "/v2/api-docs", "/webjars",
 			"/swagger-ui.html", "/error" };
-	private static final String[] ADMIN_RESTRICTED = { "/user/create", "/user/delete", "/user"};
+	private static final String[] ADMIN_RESTRICTED = { "/user/create", "/user/delete", "/user", "/formation/create", "/formation/delete"};
 	private ListableBeanFactory listableBeanFactory;
 
 	@Override
