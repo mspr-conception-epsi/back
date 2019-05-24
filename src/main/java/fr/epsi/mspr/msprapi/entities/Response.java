@@ -1,12 +1,24 @@
 package fr.epsi.mspr.msprapi.entities;
 
 import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
 
+@Entity
 public class Response {
 
 	private @EmbeddedId ResponseId id;
 	private String content;
 	private String label;
+	
+	@ManyToOne
+	@MapsId("questionId")
+	private Question question;
+	
+	@ManyToOne
+	@MapsId("formId")
+	private Form form;
 	
 	public ResponseId getId() {
 		return id;
