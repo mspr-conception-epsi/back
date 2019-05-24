@@ -2,5 +2,7 @@ package fr.epsi.mspr.msprapi.enums;
 
 public enum QuestionType {
 
-	TEXT();
+	TEXT(),
+	CHECKBOX(),
+	DROPDOWNLIST();
 }

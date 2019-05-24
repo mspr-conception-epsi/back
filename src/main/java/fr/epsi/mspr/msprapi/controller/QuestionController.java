@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.epsi.mspr.msprapi.entities.Question;
+import fr.epsi.mspr.msprapi.enums.QuestionType;
 import fr.epsi.mspr.msprapi.repository.QuestionRepository;
 import io.swagger.annotations.ApiOperation;
 
@@ -28,6 +29,12 @@ public class QuestionController {
 	@GetMapping("/question")
 	public List<Question> findAll() {
 		return questionRepository.findAll();
+	}
+	
+	@ApiOperation(value = "List of question type")
+	@GetMapping("/question/type")
+	public QuestionType[] findAllType() {
+		return QuestionType.values();
 	}
 
 	@ApiOperation(value = "Create new question")
