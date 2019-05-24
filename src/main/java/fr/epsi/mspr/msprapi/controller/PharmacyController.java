@@ -41,6 +41,24 @@ public class PharmacyController {
 		return pharmacyRepository.save(pharmacy);
 	}
 	
+	@ApiOperation(value = "Update a pharmacy")
+	@PostMapping("/pharmacy/update")
+	public Map<String, String> updatePharmacy(@Valid @RequestBody Pharmacy pharmacy) {
+		Map<String, String> msg = new HashMap<>();
+		if(pharmacy.getId() > 0) {
+			Optional<Pharmacy> form = pharmacyRepository.findById((long)pharmacy.getId());
+			if(form.isPresent()) {
+				pharmacyRepository.save(pharmacy);
+				msg.put("success", "Pharmacie modifiée");
+			} else {
+				msg.put("error", "Pharmacie inexistante");
+			}
+		} else {
+			msg.put("error", "Veuillez fournir l'identifiant");
+		}
+		return msg;
+	}
+	
 	@ApiOperation(value = "Delete pharmacy")
 	@PostMapping("/pharmacy/delete")
 	public Map<String, String> deletePharmacy(@Valid @RequestBody Pharmacy pharmacy) {

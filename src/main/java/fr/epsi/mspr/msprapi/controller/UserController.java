@@ -35,6 +35,24 @@ public class UserController {
         return userRepository.save(user);
     }
 	
+	@ApiOperation(value = "Update a user")
+	@PostMapping("/user/update")
+    public Map<String, String> updateUser(@Valid @RequestBody User user) {
+		Map<String, String> msg = new HashMap<>();
+		if(user.getId() > 0) {
+			Optional<User> form = userRepository.findById((long)user.getId());
+			if(form.isPresent()) {
+				userRepository.save(user);
+				msg.put("success", "Utilisateur modifié");
+			} else {
+				msg.put("error", "Utilisateur inexistant");
+			}
+		} else {
+			msg.put("error", "Veuillez fournir l'identifiant");
+		}
+		return msg;
+    }
+	
 	@ApiOperation(value = "Delete user")
 	@PostMapping("/user/delete")
     public Map<String, String> deleteUser(@Valid @RequestBody User user) {

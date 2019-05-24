@@ -34,6 +34,24 @@ public class ProductController {
 	public Product createProduct(@Valid @RequestBody Product product) {
 		return productRepository.save(product);
 	}
+	
+	@ApiOperation(value = "Update a product")
+	@PostMapping("/product/update")
+	public Map<String, String> updateProduct(@Valid @RequestBody Product product) {
+		Map<String, String> msg = new HashMap<>();
+		if (product.getId() > 0) {
+			Optional<Product> form = productRepository.findById((long) product.getId());
+			if (form.isPresent()) {
+				productRepository.save(product);
+				msg.put("success", "Produit modifié");
+			} else {
+				msg.put("error", "Produit inexistant");
+			}
+		} else {
+			msg.put("error", "Veuillez fournir l'identifiant");
+		}
+		return msg;
+	}
 
 	@ApiOperation(value = "Delete a product")
 	@PostMapping("/product/delete")
