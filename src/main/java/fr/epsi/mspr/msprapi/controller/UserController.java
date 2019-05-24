@@ -1,6 +1,9 @@
 package fr.epsi.mspr.msprapi.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -30,5 +33,23 @@ public class UserController {
 	@PostMapping("/user/create")
     public User createUser(@Valid @RequestBody User user) {
         return userRepository.save(user);
+    }
+	
+	@ApiOperation(value = "Delete user")
+	@PostMapping("/user/delete")
+    public Map<String, String> deleteUser(@Valid @RequestBody User user) {
+		Map<String, String> msg = new HashMap<>();
+		if(user.getId() > 0) {
+			Optional<User> form = userRepository.findById((long)user.getId());
+			if(form.isPresent()) {
+				userRepository.delete(user);
+				msg.put("success", "Utilisateur supprimé");
+			} else {
+				msg.put("error", "Utilisateur inexistant");
+			}
+		} else {
+			msg.put("error", "Veuillez fournir l'identifiant");
+		}
+		return msg;
     }
 }

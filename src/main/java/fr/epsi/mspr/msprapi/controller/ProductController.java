@@ -1,6 +1,9 @@
 package fr.epsi.mspr.msprapi.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -25,16 +28,28 @@ public class ProductController {
 	public List<Product> findAll() {
 		return productRepository.findAll();
 	}
-	
+
 	@ApiOperation(value = "Create new product")
 	@PostMapping("/product/create")
-    public Product createProduct(@Valid @RequestBody Product product) {
-        return productRepository.save(product);
-    }
-	
+	public Product createProduct(@Valid @RequestBody Product product) {
+		return productRepository.save(product);
+	}
+
 	@ApiOperation(value = "Delete a product")
 	@PostMapping("/product/delete")
-    public Product deleteProduct(@Valid @RequestBody Product product) {
-        return productRepository.save(product);
-    }
+	public Map<String, String> deleteProduct(@Valid @RequestBody Product product) {
+		Map<String, String> msg = new HashMap<>();
+		if (product.getId() > 0) {
+			Optional<Product> form = productRepository.findById((long) product.getId());
+			if (form.isPresent()) {
+				productRepository.delete(product);
+				msg.put("success", "Produit supprimé");
+			} else {
+				msg.put("error", "Produit inexistant");
+			}
+		} else {
+			msg.put("error", "Veuillez fournir l'identifiant");
+		}
+		return msg;
+	}
 }

@@ -1,6 +1,9 @@
 package fr.epsi.mspr.msprapi.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -36,6 +39,24 @@ public class PharmacyController {
 	@PostMapping("/pharmacy/create")
 	public Pharmacy createPharmacy(@Valid @RequestBody Pharmacy pharmacy) {
 		return pharmacyRepository.save(pharmacy);
+	}
+	
+	@ApiOperation(value = "Delete pharmacy")
+	@PostMapping("/pharmacy/delete")
+	public Map<String, String> deletePharmacy(@Valid @RequestBody Pharmacy pharmacy) {
+		Map<String, String> msg = new HashMap<>();
+		if(pharmacy.getId() > 0) {
+			Optional<Pharmacy> form = pharmacyRepository.findById((long)pharmacy.getId());
+			if(form.isPresent()) {
+				pharmacyRepository.delete(pharmacy);
+				msg.put("success", "Pharmacie supprimée");
+			} else {
+				msg.put("error", "Pharmacie inexistante");
+			}
+		} else {
+			msg.put("error", "Veuillez fournir l'identifiant");
+		}
+		return msg;
 	}
 
 	@ApiOperation(value = "List of pharmacies in area size")
