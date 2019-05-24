@@ -40,6 +40,7 @@ public class QuestionController {
 	@ApiOperation(value = "Create new question")
 	@PostMapping("/question/create")
 	public Question createQuestion(@Valid @RequestBody Question question) {
+		question.setId(0);
 		return questionRepository.save(question);
 	}
 	

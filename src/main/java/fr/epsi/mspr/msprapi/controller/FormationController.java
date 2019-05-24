@@ -33,6 +33,7 @@ public class FormationController {
 	@ApiOperation(value = "Create new formation")
 	@PostMapping("/formation/create")
 	public Formation createFormation(@Valid @RequestBody Formation formation) {
+		formation.setId(0);
 		return formationRepository.save(formation);
 	}
 	

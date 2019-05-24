@@ -33,6 +33,7 @@ public class FormController {
 	@ApiOperation(value = "Create new form")
 	@PostMapping("/form/create")
 	public Form createForm(@Valid @RequestBody Form form) {
+		form.setId(0);
 		return formRepository.save(form);
 	}
 	

@@ -32,6 +32,7 @@ public class RequestController {
 	@ApiOperation(value = "Create new request")
 	@PostMapping("/request/create")
     public Request createRequest(@Valid @RequestBody Request request) {
+		request.setId(0);
         return requestRepository.save(request);
     }
 	

@@ -32,6 +32,7 @@ public class ProductController {
 	@ApiOperation(value = "Create new product")
 	@PostMapping("/product/create")
 	public Product createProduct(@Valid @RequestBody Product product) {
+		product.setId(0);
 		return productRepository.save(product);
 	}
 	

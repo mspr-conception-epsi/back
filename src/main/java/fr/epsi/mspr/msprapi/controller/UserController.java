@@ -32,6 +32,7 @@ public class UserController {
 	@ApiOperation(value = "Create new user")
 	@PostMapping("/user/create")
     public User createUser(@Valid @RequestBody User user) {
+		user.setId(0);
         return userRepository.save(user);
     }
 	

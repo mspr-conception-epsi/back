@@ -38,6 +38,7 @@ public class PharmacyController {
 	@ApiOperation(value = "Create new pharmacy")
 	@PostMapping("/pharmacy/create")
 	public Pharmacy createPharmacy(@Valid @RequestBody Pharmacy pharmacy) {
+		pharmacy.setId(0);
 		return pharmacyRepository.save(pharmacy);
 	}
 	
