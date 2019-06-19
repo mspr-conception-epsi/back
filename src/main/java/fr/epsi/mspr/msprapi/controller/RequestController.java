@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -33,7 +34,7 @@ public class RequestController {
 	@ApiOperation(value = "List of requests by pharmacy")
 	@PostMapping("/request/bypharmacy")
 	public List<Request> findAllPharmacy(@Valid @RequestBody DtoPharmacyIdentifiation dto) {
-		return requestRepository.findByPharmacy(dto.getPharmacyId());
+		return findAll().stream().filter(s -> s.getPharmacy().getId() == dto.getPharmacyId()).collect(Collectors.toList());
 	}
 	
 	@ApiOperation(value = "Create new request")
