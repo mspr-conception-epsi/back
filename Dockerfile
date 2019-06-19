@@ -1,8 +1,15 @@
-FROM maven:3.6.0-jdk-8 AS build
+FROM maven:3.5-jdk-8-alpine as build
+
 WORKDIR /app
-COPY . .
-RUN mvn clean install
-FROM openjdk:8-jdk
-COPY --from=build target/mspr-api-0.0.1-SNAPSHOT.jar /usr/local/lib/pharmacy-api.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","/usr/local/lib/pharmacy-api.jar"]
+
+COPY . /app
+
+RUN mvn install
+
+FROM openjdk:8-jre-alpine
+
+WORKDIR /app
+
+COPY --from=build /app/target/mspr-api-0.0.1-SNAPSHOT.jar /app
+
+CMD ["java -jar mspr-api-0.0.1-SNAPSHOT.jar"]
