@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import fr.epsi.mspr.msprapi.dto.DtoPharmacyIdentifiation;
 import fr.epsi.mspr.msprapi.entities.Request;
 import fr.epsi.mspr.msprapi.repository.RequestRepository;
 import io.swagger.annotations.ApiOperation;
@@ -31,8 +32,8 @@ public class RequestController {
 	
 	@ApiOperation(value = "List of requests by pharmacy")
 	@PostMapping("/request/bypharmacy")
-	public List<Request> findAllPharmacy(@Valid @RequestBody int pharmacyId) {
-		return requestRepository.findByPharmacy(pharmacyId);
+	public List<Request> findAllPharmacy(@Valid @RequestBody DtoPharmacyIdentifiation dto) {
+		return requestRepository.findByPharmacy(dto.getPharmacyId());
 	}
 	
 	@ApiOperation(value = "Create new request")
