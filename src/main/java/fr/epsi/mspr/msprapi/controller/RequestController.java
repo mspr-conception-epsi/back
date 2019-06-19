@@ -30,7 +30,7 @@ public class RequestController {
 	}
 	
 	@ApiOperation(value = "List of requests by pharmacy")
-	@GetMapping("/request/bypharmacy")
+	@PostMapping("/request/bypharmacy")
 	public List<Request> findAllPharmacy(@Valid @RequestBody int pharmacyId) {
 		return requestRepository.findByPharmacy(pharmacyId);
 	}
