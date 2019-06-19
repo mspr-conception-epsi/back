@@ -47,6 +47,7 @@ public class CustomFilter extends GenericFilterBean {
 		}
 		
 		System.out.println(request.getRemoteAddr());
+		System.out.println(request.getLocalAddr());
 		
 		if (userRepository == null) {
 			ServletContext servletContext = request.getServletContext();
