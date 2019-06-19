@@ -29,6 +29,12 @@ public class RequestController {
 		return requestRepository.findAll();
 	}
 	
+	@ApiOperation(value = "List of requests by pharmacy")
+	@GetMapping("/request/bypharmacy")
+	public List<Request> findAllPharmacy(@Valid @RequestBody int pharmacyId) {
+		return requestRepository.findByPharmacy(pharmacyId);
+	}
+	
 	@ApiOperation(value = "Create new request")
 	@PostMapping("/request/create")
     public Request createRequest(@Valid @RequestBody Request request) {
