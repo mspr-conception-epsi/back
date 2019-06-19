@@ -35,12 +35,19 @@ public class CustomFilter extends GenericFilterBean {
 	private UserRepository userRepository;
 	private static final String[] WHITELIST = { "/swagger-resources", "/swagger-ui.html", "/v2/api-docs", "/webjars",
 			"/swagger-ui.html", "/error" };
-	private static final String[] ADMIN_RESTRICTED = { "/user/create", "/user/delete", "/user", "/formation/create", "/formation/delete"};
+	private static final String[] ADMIN_RESTRICTED = { "/user/create", "/user/delete", "/user", "/formation/create",
+			"/formation/delete" };
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 
+		if ("127.0.0.1".equals(request.getRemoteAddr())) {
+			return;
+		}
+		
+		System.out.println(request.getRemoteAddr());
+		
 		if (userRepository == null) {
 			ServletContext servletContext = request.getServletContext();
 			WebApplicationContext webApplicationContext = WebApplicationContextUtils
@@ -108,7 +115,7 @@ public class CustomFilter extends GenericFilterBean {
 							sendInvalidReponse(httpRequest, httpResponse, "Vous devez etre un admin");
 						}
 					} else {
-						if(LOGOUT.equals(pathWithinApplication)) {
+						if (LOGOUT.equals(pathWithinApplication)) {
 							user.setToken(null);
 							userRepository.save(user);
 							sendLogoutReponse(httpRequest, httpResponse);
@@ -123,7 +130,8 @@ public class CustomFilter extends GenericFilterBean {
 		}
 	}
 
-	private void sendLogoutReponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws JsonProcessingException, IOException {
+	private void sendLogoutReponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse)
+			throws JsonProcessingException, IOException {
 		httpResponse.setStatus(HttpServletResponse.SC_OK);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("success", "Déconnexion effectuée");
