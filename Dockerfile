@@ -1,16 +1,15 @@
-FROM maven:3.5-jdk-8-alpine as build
+#
+# Build stage
+#
+FROM maven:3.6.0-jdk-8-slim AS build
+COPY src /home/app/src
+COPY pom.xml /home/app
+RUN mvn -f /home/app/pom.xml clean package
 
-WORKDIR /app
-RUN ls -la
-COPY ./src ./src
-COPY . .
-RUN ls -la
-RUN mvn install
-
-FROM openjdk:8-jre-alpine
-
-WORKDIR /app
-
-COPY --from=build /app/target/mspr-api-0.0.1-SNAPSHOT.jar /app
-
-CMD ["java -jar mspr-api-0.0.1-SNAPSHOT.jar"]
+#
+# Package stage
+#
+FROM openjdk:8-jre-slim
+COPY --from=build /home/app/target/mspr-api-0.0.1-SNAPSHOT.jar /usr/local/lib/mspr-api.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","/usr/local/lib/mspr-api.jar"]
