@@ -41,13 +41,6 @@ public class CustomFilter extends GenericFilterBean {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-
-		if ("127.0.0.1".equals(request.getRemoteAddr())) {
-			return;
-		}
-		
-		System.out.println(request.getRemoteAddr());
-		System.out.println(request.getLocalAddr());
 		
 		if (userRepository == null) {
 			ServletContext servletContext = request.getServletContext();
