@@ -2,6 +2,7 @@ FROM maven:3.5-jdk-8-alpine as build
 
 WORKDIR /app
 RUN ls -la
+COPY ./src ./src
 COPY . .
 RUN ls -la
 RUN mvn install
