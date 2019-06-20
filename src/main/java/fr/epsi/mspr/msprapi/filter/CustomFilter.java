@@ -79,11 +79,10 @@ public class CustomFilter extends GenericFilterBean {
 					if (optionalUser.isPresent()) {
 						User user = optionalUser.get();
 						System.out.println(password.get());
-						String inputCryptPassword;
 						try {
-							inputCryptPassword = getCryptPassword(password.get());
+							byte[] inputCryptPassword = getCryptPassword(password.get());
 							System.out.println("pass > " + inputCryptPassword);
-							if (user.getPassword().equals(inputCryptPassword)) {
+							if (user.getPassword().getBytes() == inputCryptPassword) {
 								String generatedToken = UUID.randomUUID().toString();
 								user.setToken(generatedToken);
 								userRepository.save(user);
@@ -199,8 +198,8 @@ public class CustomFilter extends GenericFilterBean {
 		return (HttpServletResponse) response;
 	}
 	
-	private String getCryptPassword(String password) throws NoSuchAlgorithmException {
-		return new String(getDigest().digest(password.getBytes(StandardCharsets.UTF_8)));
+	private byte[] getCryptPassword(String password) throws NoSuchAlgorithmException {
+		return getDigest().digest(password.getBytes(StandardCharsets.UTF_8));
 	}
 	@Bean
 	private MessageDigest getDigest() throws NoSuchAlgorithmException {
