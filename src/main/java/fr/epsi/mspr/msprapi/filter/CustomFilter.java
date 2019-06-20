@@ -2,8 +2,6 @@ package fr.epsi.mspr.msprapi.filter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
@@ -19,7 +17,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.GenericFilterBean;
@@ -79,20 +76,14 @@ public class CustomFilter extends GenericFilterBean {
 					if (optionalUser.isPresent()) {
 						User user = optionalUser.get();
 						System.out.println(password.get());
-						try {
-							byte[] inputCryptPassword = getCryptPassword(password.get());
-							System.out.println("pass > " + inputCryptPassword);
-							if (user.getPassword().getBytes() == inputCryptPassword) {
-								String generatedToken = UUID.randomUUID().toString();
-								user.setToken(generatedToken);
-								userRepository.save(user);
-								setValidReponseWithToken(httpRequest, httpResponse, generatedToken);
-								System.out.println("return " + generatedToken);
-							} else {
-								sendInvalidReponse(httpRequest, httpResponse, "Mot de passe incorrect.");
-							}
-						} catch (NoSuchAlgorithmException e) {
-							e.printStackTrace();
+						if (user.getPassword().equals(password.get())) {
+							String generatedToken = UUID.randomUUID().toString();
+							user.setToken(generatedToken);
+							userRepository.save(user);
+							setValidReponseWithToken(httpRequest, httpResponse, generatedToken);
+							System.out.println("return " + generatedToken);
+						} else {
+							sendInvalidReponse(httpRequest, httpResponse, "Mot de passe incorrect.");
 						}
 					} else {
 						sendInvalidReponse(httpRequest, httpResponse, "Utilisateur introuvable.");
@@ -196,14 +187,6 @@ public class CustomFilter extends GenericFilterBean {
 
 	private HttpServletResponse asHttp(ServletResponse response) {
 		return (HttpServletResponse) response;
-	}
-	
-	private byte[] getCryptPassword(String password) throws NoSuchAlgorithmException {
-		return getDigest().digest(password.getBytes(StandardCharsets.UTF_8));
-	}
-	@Bean
-	private MessageDigest getDigest() throws NoSuchAlgorithmException {
-		return MessageDigest.getInstance("SHA-256");
 	}
 
 }
