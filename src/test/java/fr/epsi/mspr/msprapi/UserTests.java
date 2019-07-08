@@ -13,7 +13,7 @@ import fr.epsi.mspr.msprapi.repository.UserRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class MsprApiApplicationTests {
+public class UserTests {
 	
 	@Autowired
 	private UserRepository userRepository;
