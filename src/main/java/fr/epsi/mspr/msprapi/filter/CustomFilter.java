@@ -22,7 +22,6 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.epsi.mspr.msprapi.entities.User;
@@ -42,6 +41,7 @@ public class CustomFilter extends GenericFilterBean {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		
+		//Autowired is not allowed here, so let's get an instance of CustomFilter into Spring context
 		if (userRepository == null) {
 			ServletContext servletContext = request.getServletContext();
 			WebApplicationContext webApplicationContext = WebApplicationContextUtils
@@ -75,23 +75,23 @@ public class CustomFilter extends GenericFilterBean {
 							String generatedToken = UUID.randomUUID().toString();
 							user.setToken(generatedToken);
 							userRepository.save(user);
-							setValidReponseWithToken(httpRequest, httpResponse, generatedToken);
+							setValidReponseWithToken(httpResponse, generatedToken);
 						} else {
-							sendInvalidReponse(httpRequest, httpResponse, "Mot de passe incorrect.");
+							sendInvalidReponse(httpResponse, "Mot de passe incorrect.");
 						}
 					} else {
-						sendInvalidReponse(httpRequest, httpResponse, "Utilisateur introuvable.");
+						sendInvalidReponse(httpResponse, "Utilisateur introuvable.");
 					}
 				} else {
-					sendInvalidReponse(httpRequest, httpResponse, "Mot de passe ou utilisateur non spécifié");
+					sendInvalidReponse(httpResponse, "Mot de passe ou utilisateur non spécifié");
 				}
 			} else {
-				sendInvalidReponse(httpRequest, httpResponse, "Invalid data : Please use Basic header authorization");
+				sendInvalidReponse(httpResponse, "Invalid data : Please use Basic header authorization");
 			}
 		} else {
 			String token = getBearerToken(httpRequest);
 			if (token == null) {
-				sendInvalidReponse(httpRequest, httpResponse, "Token not found");
+				sendInvalidReponse(httpResponse, "Token not found");
 			} else {
 				Optional<User> optionalUser = userRepository.findByToken(token);
 				if (optionalUser.isPresent()) {
@@ -100,26 +100,25 @@ public class CustomFilter extends GenericFilterBean {
 						if (user.isAdmin()) {
 							chain.doFilter(request, response);
 						} else {
-							sendInvalidReponse(httpRequest, httpResponse, "Vous devez etre un admin");
+							sendInvalidReponse(httpResponse, "Vous devez etre un admin");
 						}
 					} else {
 						if (LOGOUT.equals(pathWithinApplication)) {
 							user.setToken(null);
 							userRepository.save(user);
-							sendLogoutReponse(httpRequest, httpResponse);
+							sendLogoutReponse(httpResponse);
 						} else {
 							chain.doFilter(request, response);
 						}
 					}
 				} else {
-					sendInvalidReponse(httpRequest, httpResponse, "Token invalide. Veuillez vous reconnecter");
+					sendInvalidReponse(httpResponse, "Token invalide. Veuillez vous reconnecter");
 				}
 			}
 		}
 	}
 
-	private void sendLogoutReponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse)
-			throws JsonProcessingException, IOException {
+	private void sendLogoutReponse(HttpServletResponse httpResponse) throws IOException {
 		httpResponse.setStatus(HttpServletResponse.SC_OK);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("success", "Déconnexion effectuée");
@@ -127,8 +126,7 @@ public class CustomFilter extends GenericFilterBean {
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
 	}
 
-	private void setValidReponseWithToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
-			String generatedToken) throws IOException {
+	private void setValidReponseWithToken(HttpServletResponse httpResponse, String generatedToken) throws IOException {
 		httpResponse.setStatus(HttpServletResponse.SC_OK);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("token", generatedToken);
@@ -136,8 +134,7 @@ public class CustomFilter extends GenericFilterBean {
 		httpResponse.getWriter().print(new ObjectMapper().writeValueAsString(reponse));
 	}
 
-	private void sendInvalidReponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String message)
-			throws IOException {
+	private void sendInvalidReponse( HttpServletResponse httpResponse, String message) throws IOException {
 		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("error", message);
