@@ -54,8 +54,6 @@ public class CustomFilter extends GenericFilterBean {
 
 		String pathWithinApplication = new UrlPathHelper().getPathWithinApplication(httpRequest);
 
-		System.out.println("received request at " + pathWithinApplication);
-
 		for (final String value : WHITELIST) {
 			if (pathWithinApplication.contains(value)) {
 				chain.doFilter(request, response);
@@ -63,10 +61,7 @@ public class CustomFilter extends GenericFilterBean {
 			}
 		}
 
-		System.out.println("method> " + httpRequest.getMethod());
-
 		if (AUTH_SIGNIN.startsWith(pathWithinApplication)) {
-			System.out.println("try to auth");
 			Optional<String[]> data = getConnectionData(httpRequest);
 			if (data.isPresent()) {
 				Optional<String> username = Optional.ofNullable(data.get()[0]);
@@ -81,7 +76,6 @@ public class CustomFilter extends GenericFilterBean {
 							user.setToken(generatedToken);
 							userRepository.save(user);
 							setValidReponseWithToken(httpRequest, httpResponse, generatedToken);
-							System.out.println("return " + generatedToken);
 						} else {
 							sendInvalidReponse(httpRequest, httpResponse, "Mot de passe incorrect.");
 						}
@@ -144,7 +138,6 @@ public class CustomFilter extends GenericFilterBean {
 
 	private void sendInvalidReponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String message)
 			throws IOException {
-		System.out.println("invalid response : " + message);
 		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		Map<String, String> reponse = new HashMap<>();
 		reponse.put("error", message);
@@ -162,7 +155,6 @@ public class CustomFilter extends GenericFilterBean {
 
 	private String getBearerToken(HttpServletRequest request) {
 		String authHeader = request.getHeader("Authorization");
-		System.out.println("header token > " + authHeader);
 		if (authHeader != null && authHeader.toLowerCase().startsWith("bearer")) {
 			return authHeader.substring("Bearer ".length());
 		}
@@ -171,7 +163,6 @@ public class CustomFilter extends GenericFilterBean {
 
 	private Optional<String[]> getConnectionData(HttpServletRequest request) {
 		String authHeader = request.getHeader("Authorization");
-		System.out.println("header user/pass > " + authHeader);
 		if (authHeader != null && authHeader.toLowerCase().startsWith("basic")) {
 			String base64Credentials = authHeader.substring("Basic".length()).trim();
 			byte[] credDecoded = Base64.getDecoder().decode(base64Credentials);
