@@ -2,7 +2,6 @@ package fr.epsi.mspr.msprapi.entities;
 
 import java.io.Serializable;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 public class User implements Serializable {
 
+	//TODO : Use UUID instead of Auto Increment
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
